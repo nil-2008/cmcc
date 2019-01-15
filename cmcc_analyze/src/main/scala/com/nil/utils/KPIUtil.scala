@@ -38,12 +38,12 @@ object KPIUtil {
 				//省份Code
 				val provinceCode = obj.getString("provinceCode")
 				val costTime = CalendarUtil.deltTime(requestId, receiveTime)
-				val succAndFeeAndTime: (Double, Double, Double) =
+				val successAndFeeAndTime: (Double, Double, Double) =
 					if (result.equals("0000")) (1, fee, costTime)
 					else (0, 0, 0)
 
 				// [日期, 小时, Kpi(订单，成功订单，订单金额，订单时长),省份Code，分钟数]
-				(day, hour, List[Double](1, succAndFeeAndTime._1, succAndFeeAndTime._2, succAndFeeAndTime._3), provinceCode, minute)
+				(day, hour, List[Double](1, successAndFeeAndTime._1, successAndFeeAndTime._2, successAndFeeAndTime._3), provinceCode, minute)
 			}).cache()
 	}
 

@@ -41,6 +41,8 @@ object AppMain {
 		val currentOffset = OffsetManager.getMydbCurrentOffset
 
 		//使用广播的方式匹配省份
+		//广播变量初始的时候就在Drvier上有一份副本，task在运行的时候，想要使用广播变量中的数据，此时首先会在自己本地的Executor对应的BlockManager中，尝试获取变量副本。如果本地没有，那么就从Driver远程拉取变量副本，并保存在本地的BlockManager中，此后这个executor上的task都会直接使用本地的BlockManager中的副本。executor的BlockManager除了从driver上拉取，也可能从其他节点的BlockManager上拉取变量副本，距离越近越好
+		//广播变量的优点：不是每个task一份变量副本，而是变成每个节点的executor才一份副本。这样的话，就可以让变量产生的副本大大减少。
 		val provinceCode2Name = ssc.sparkContext.broadcast(PropertiesUtil.provinceCode2Name)
 
 		/*
@@ -60,6 +62,8 @@ object AppMain {
 
 		//数据处理
 		stream.foreachRDD(rdd => {
+			//asInstanceOf[T]将对象类型强制转换为T类型。
+
 			val offsetRanges = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
 
 			val baseData = KPIUtil.baseDataRDD(rdd)
@@ -75,6 +79,9 @@ object AppMain {
 			KPIUtil.kpi_realtime_minute(baseData)
 
 			//存储偏移量
+			//1. spark streaming 使用 direct方式直接读取 kafka的数据，offset 没有经过zookeeper。
+			// 因此在KafkaOffsetMonitor中也监控不到数据 。
+			//2. 我们通过sparkstreaming操作offset，然后kafkacluster将offset更新到zookeeper中。
 			OffsetManager.saveCurrentOffset(offsetRanges)
 		})
 		ssc.start()

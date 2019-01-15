@@ -33,14 +33,21 @@ object PropertiesUtil {
 
 	val provinceCode2Name = conf.getObject("provinceCode2Name").unwrapped().toMap
 
-	// kafka的相关参数
+	// kafka consumer配置
 	val kafkaParams = Map[String, Object](
 		"bootstrap.servers" -> broker,
+		//现了Deserializer的key的反序列化类
 		"key.deserializer" -> classOf[StringDeserializer],
+		//实现了Deserializer的value的反序列化类
 		"value.deserializer" -> classOf[StringDeserializer],
 		"group.id" -> groupId,
-		//任务启动之前产生的数据也要读
+		//当kafka的初始偏移量没了，或者当前的偏移量不存在的情况下，应该怎么办？下面有几种策略：
+		// earliest（将偏移量自动重置为最初的值）、
+		// latest（自动将偏移量置为最新的值）、
+		// none（如果在消费者组中没有发现前一个偏移量，就向消费者抛出一个异常）、
+		// anything else（向消费者抛出异常）
 		"auto.offset.reset" -> "earliest",
+		//如果设为true，消费者的偏移量会定期在后台提交。
 		"enable.auto.commit" -> "false"
 	)
 

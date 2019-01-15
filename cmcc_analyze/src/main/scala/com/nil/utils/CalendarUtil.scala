@@ -13,7 +13,7 @@ object CalendarUtil {
 	private val format = FastDateFormat.getInstance("yyyyMMddHHmmssSSS")
 
 	/**
-	  * 计算时间差
+	  * 计算时间差：该函数是根据本项目传输的参数的值来编写的，如果传输的值的格式不同，需要做相应的调整
 	  *
 	  * @param startTime
 	  * @param endTime
